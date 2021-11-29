@@ -1,4 +1,5 @@
 using api.Data;
+using api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,10 @@ namespace api
         {
             services.AddDbContext<ApiContext>(options 
             => options.UseSqlServer(Configuration.GetConnectionString("ApiConnection")));
+
+            services.AddTransient<IPostService, PostService>();
+            services.AddTransient<ICommentService, CommentService>();
+            services.AddTransient<IMediaService, MediaService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
