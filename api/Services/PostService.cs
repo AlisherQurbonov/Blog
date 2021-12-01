@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Entities;
@@ -25,7 +26,7 @@ namespace api.Services
             await _ctx.Posts.AddAsync(post);
             await _ctx.SaveChangesAsync();
 
-            _log.LogInformation($"Post create in DB: {post.Id}");
+            _log.LogInformation($"Post create in DB: {post}");
 
             return (true, null, post);
         }
@@ -60,6 +61,13 @@ namespace api.Services
         => _ctx.Posts
             .AsNoTracking()
             .Include(m => m.Comments)
+            .Include(m => m.Medias)
+            .ToListAsync();
+         public Task<List<Post>> GetIdAsync(Guid id)
+        => _ctx.Posts
+            .AsNoTracking()
+            .Where(i => i.Id == id)
+             .Include(m => m.Comments)
             .Include(m => m.Medias)
             .ToListAsync();
         public Task <Post> GetAsync(Guid id)

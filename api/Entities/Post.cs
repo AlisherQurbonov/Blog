@@ -32,22 +32,6 @@ namespace api.Entities
 
         public ICollection<Media> Medias { get; set; }
 
-        // [Obsolete("Warning")]
-        // public Post() { }
-
-        // public Post(string title, string description, string content, uint viewed, ICollection<Media> medias)
-        // {
-        //     Id = Guid.NewGuid();
-        //     HeaderImageId= Guid.NewGuid();
-        //     Title = title;
-        //     Description = description;
-        //     Content = content;
-        //     Viewed = viewed;
-        //     CreatedAt = DateTimeOffset.UtcNow;
-        //     ModifiedAt = CreatedAt;
-        //     Medias = medias;
-        // }
-
 
     }
 }

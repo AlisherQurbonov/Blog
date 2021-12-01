@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using api.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace api.Models
 {
     public class NewPost
     {
+     public Guid HeaderImageId { get; set; }
 
     [MaxLength(255)]
     [Required]
@@ -17,8 +20,7 @@ namespace api.Models
     public uint Viewed { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset ModifiedAt { get; set; }
-    // public ICollection<Comment> Comments { get; set; }
-    public ICollection<Guid> HeaderImageId { get; set; }
+    public ICollection<Guid> Medias { get; set; }
 
     }
 }

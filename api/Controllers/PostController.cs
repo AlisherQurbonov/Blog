@@ -6,6 +6,8 @@ using api.Mappers;
 using api.Models;
 using api.Services;
 using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace api.Controller
 {
@@ -35,15 +37,16 @@ namespace api.Controller
         }
 
         [HttpPost]
+        [ActionName(nameof(PostAsync))]
         public async Task<IActionResult> PostAsync(NewPost post)
         {
-            var media = post.HeaderImageId.Select(id => _mc.GetAsync(id).Result);
+            var media = post.Medias.Select(id => _mc.GetAsync(id).Result);
             var result = await _pc.CreateAsync(post.ToPostEntity(media));
 
-            if (result.IsSuccess)
+           if(result.IsSuccess)
             {
-                _log.LogInformation($"Post create in DB: {media}");
-                return Ok();
+                 _log.LogInformation($"Pizza create in DB: {post.ToPostEntity(media).Id}");
+                return CreatedAtAction(nameof(PostAsync), new {id = post.ToPostEntity(media).Id }, post.ToPostEntity(media));
             }
 
             return BadRequest(result.Exception.Message);
@@ -60,7 +63,6 @@ namespace api.Controller
                 {
                     return new {
                         Id = i.Id,
-                        HeaderImageId=i.HeaderImageId,
                         Title = i.Title,
                         Description=i.Description,
                         Content=i.Content,
@@ -73,21 +75,63 @@ namespace api.Controller
               }));
         }
 
+    //  [HttpGet]
+    //   public async Task<IActionResult> GetAsync()
+    // {
+    //     JsonSerializerOptions options = new()
+    //     {
+    //         ReferenceHandler = ReferenceHandler.Preserve,
+    //         WriteIndented = true
+    //     };
+
+    //     var json = JsonSerializer.Serialize(await _pc.GetAllAsync(), options);
+    //     return Ok(json);
+    // }
+
+
+        // [HttpGet]
+        // [Route("{Id}")]
+        // public async Task<IActionResult> GetPostAsync([FromRoute]Guid Id)
+        // {
+        //     var post = await _pc.GetAsync(Id);
+               
+
+        //     if(post is default(Entities.Post))
+        //     {
+        //         return NotFound($"User with ID {Id} not found");
+        //     }
+
+        //     return Ok(post);
+              
+        // }
 
         [HttpGet]
         [Route("{Id}")]
-        public async Task<IActionResult> GetPostAsync([FromRoute]Guid Id)
+        public async Task<IActionResult> GetIdMedia(Guid Id)
         {
-            var post = await _pc.GetAsync(Id);
-               
+      
+           if(!await _pc.ExistsAsync(Id))
+        {
+            return NotFound();
+        }
 
-            if(post is default(Entities.Post))
-            {
-                return NotFound($"User with ID {Id} not found");
-            }
+            var images = await _pc.GetIdAsync(Id);
 
-            return Ok(post);
-              
+            return Ok(images
+                .Select(i =>
+                {
+                    return new {
+                        Id = i.Id,
+                        Title = i.Title,
+                        Description=i.Description,
+                        Content=i.Content,
+                        Viewed=i.Viewed,
+                        CreatedAt=i.CreatedAt,
+                        ModifiedAt=i.ModifiedAt,
+                        Comments=i.Comments
+
+                    };
+              }));
         }
 
        [HttpPut]
@@ -95,7 +139,7 @@ namespace api.Controller
        public async Task<ActionResult> UpdateAsync([FromRoute]Guid id, [FromBody]NewPost post) 
        {
 
-            var media = post.HeaderImageId.Select(id => _mc.GetAsync(id).Result);
+            var media = post.Medias.Select(id => _mc.GetAsync(id).Result);
             var topostEntity = post.ToPostEntity(media);
             var result = await _pc.UpdatePostAsync(topostEntity);
             
@@ -116,7 +160,12 @@ namespace api.Controller
 
             var post =  await _pc.DeleteAsync(Id);
               
-            return Ok(post);
+            if (post.IsSuccess)
+            {
+                return Ok();
+            }
+
+            return BadRequest(post.Exception.Message);
             
         }
     }

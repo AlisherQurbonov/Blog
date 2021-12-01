@@ -33,7 +33,15 @@ namespace api.Controllers
          if(result.IsSuccess)
         {
            _log.LogInformation($"Media create in DB: {media}");
-            return Ok();
+             return Ok(files.Select(i =>
+        {
+            return new 
+            {
+                Id = i.Id,
+                ContentType = i.ContentType,
+                Size = i.Data.Length,
+            };
+        }));
         }
         return BadRequest(result.Exception.Message);
     }
@@ -67,17 +75,22 @@ namespace api.Controllers
 
      [HttpDelete]
      [Route("{Id}")]
-        public async Task<IActionResult> Delete([FromRoute]Guid Id)
-        {
+     public async Task<IActionResult> Delete([FromRoute]Guid Id)
+    {
 
-            var media =  await _ser.DeleteAsync(Id);
+         var media =  await _ser.DeleteAsync(Id);
               
-            return Ok(media);
-            
+         if(media.IsSuccess)
+        {
+           _log.LogInformation($"Media delete in DB: {media}");
+            return Ok();
         }
+        return BadRequest(media.Exception.Message);
+            
+    }
 
       private Entities.Media GetImageEntity(IFormFile file)
-      {
+    {
         using var stream = new MemoryStream();
 
         file.CopyTo(stream);
@@ -88,7 +101,7 @@ namespace api.Controllers
             ContentType = file.ContentType,
             Data = stream.ToArray()
         };
-      }
+    }
 
     }
 }

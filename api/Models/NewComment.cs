@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace api.Models
 {
@@ -10,8 +11,10 @@ namespace api.Models
 
         public string Content { get; set; }
 
-        public ECommentState State { get; set; }
-
+       [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ECommentState? State { get; set; }
         public Guid PostId { get; set; }
+        
+        
     }
 }
