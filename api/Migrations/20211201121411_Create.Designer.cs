@@ -10,7 +10,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20211129063644_Create")]
+    [Migration("20211201121411_Create")]
     partial class Create
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -110,7 +110,7 @@ namespace api.Migrations
                     b.HasOne("api.Entities.Post", null)
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -118,7 +118,8 @@ namespace api.Migrations
                 {
                     b.HasOne("api.Entities.Post", null)
                         .WithMany("Medias")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("api.Entities.Post", b =>

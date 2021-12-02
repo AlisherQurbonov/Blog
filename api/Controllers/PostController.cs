@@ -6,8 +6,7 @@ using api.Mappers;
 using api.Models;
 using api.Services;
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using api.Data;
 
 namespace api.Controller
 {
@@ -22,38 +21,44 @@ namespace api.Controller
         private readonly ICommentService _cs;
 
         private readonly IMediaService _mc;
+        private readonly ApiContext _ctx;
 
         public PostController(
             ILogger<PostController> log,
             IPostService pc,
             ICommentService cs,
-            IMediaService mc
+            IMediaService mc,
+            ApiContext ctx
         )
         {
             _log = log;
             _pc = pc;
             _cs = cs;
             _mc = mc;
+            _ctx = ctx;
         }
 
-        [HttpPost]
+        [HttpPost] 
         [ActionName(nameof(PostAsync))]
+
         public async Task<IActionResult> PostAsync(NewPost post)
         {
             var media = post.Medias.Select(id => _mc.GetAsync(id).Result);
             var result = await _pc.CreateAsync(post.ToPostEntity(media));
 
+
            if(result.IsSuccess)
             {
-                 _log.LogInformation($"Pizza create in DB: {post.ToPostEntity(media).Id}");
-                return CreatedAtAction(nameof(PostAsync), new {id = post.ToPostEntity(media).Id }, post.ToPostEntity(media));
+              _log.LogInformation($"Post create in DB: {post.ToPostEntity(media).Id}");
+            return CreatedAtAction(nameof(PostAsync), new {id = post.ToPostEntity(media).Id }, post.ToPostEntity(media));
             }
 
             return BadRequest(result.Exception.Message);
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetMedia()
+        public async Task<IActionResult> GetPost()
         {
 
             var images = await _pc.GetAllAsync();
@@ -75,35 +80,6 @@ namespace api.Controller
               }));
         }
 
-    //  [HttpGet]
-    //   public async Task<IActionResult> GetAsync()
-    // {
-    //     JsonSerializerOptions options = new()
-    //     {
-    //         ReferenceHandler = ReferenceHandler.Preserve,
-    //         WriteIndented = true
-    //     };
-
-    //     var json = JsonSerializer.Serialize(await _pc.GetAllAsync(), options);
-    //     return Ok(json);
-    // }
-
-
-        // [HttpGet]
-        // [Route("{Id}")]
-        // public async Task<IActionResult> GetPostAsync([FromRoute]Guid Id)
-        // {
-        //     var post = await _pc.GetAsync(Id);
-               
-
-        //     if(post is default(Entities.Post))
-        //     {
-        //         return NotFound($"User with ID {Id} not found");
-        //     }
-
-        //     return Ok(post);
-              
-        // }
 
         [HttpGet]
         [Route("{Id}")]
@@ -134,25 +110,23 @@ namespace api.Controller
               }));
         }
 
-       [HttpPut]
-       [Route("{id}")]
-       public async Task<ActionResult> UpdateAsync([FromRoute]Guid id, [FromBody]NewPost post) 
-       {
-
-            var media = post.Medias.Select(id => _mc.GetAsync(id).Result);
-            var topostEntity = post.ToPostEntity(media);
-            var result = await _pc.UpdatePostAsync(topostEntity);
-            
-             if (result.IsSuccess)
+        [HttpPut]
+        [Route("{Id}")]
+        public async Task<IActionResult> PostUpdate([FromRoute] Guid Id, PostUpdated updated)
+        {
+            var media = updated.Medias.Select(id => _mc.GetAsync(id).Result);
+            var toEntity = updated.ToUpdatePostEntity(media);
+            var result = await _pc.UpdatePostAsync(toEntity);
+           
+            if(result.IsSuccess)
             {
-                _log.LogInformation($"Post update in DB: {media}");
-                return Ok();
+                return Ok(result);
             }
 
             return BadRequest(result.Exception.Message);
-       }
+        }
 
-
+   
         [HttpDelete]
         [Route("{Id}")]
         public async Task<IActionResult> Delete([FromRoute]Guid Id)
@@ -162,11 +136,21 @@ namespace api.Controller
               
             if (post.IsSuccess)
             {
-                return Ok();
+                return Ok(post);
             }
 
             return BadRequest(post.Exception.Message);
             
         }
+
+
+        private bool _updatedValid(PostUpdated updated)
+        {
+            return !(updated.Title == null &&
+                    updated.Description == null &&
+                    updated.Content == null);
+                   
+        }
+
     }
 }

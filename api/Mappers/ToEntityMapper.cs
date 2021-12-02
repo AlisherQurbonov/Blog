@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 
 namespace api.Mappers
 {
@@ -21,6 +19,22 @@ namespace api.Mappers
                 CreatedAt=DateTimeOffset.UtcNow,
                 ModifiedAt=post.CreatedAt,
                  Medias = media.ToList()
+
+            };
+
+
+              public static Entities.Post ToUpdatePostEntity(this Models.PostUpdated post, IEnumerable<Entities.Media> media)
+            => new Entities.Post()
+            {
+                Id = post.Id,
+                HeaderImageId=post.HeaderImageId,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                Viewed = post.Viewed,
+                CreatedAt=DateTimeOffset.UtcNow,
+                ModifiedAt=post.CreatedAt,
+                Medias = media.ToList()
 
             };
 
@@ -43,25 +57,7 @@ namespace api.Mappers
                 Models.ECommentState.Approved => Entities.ECommentState.Approved,
                 _ => Entities.ECommentState.Rejected,
             };
-        }
-
-     private static Entities.Media GetImageEntity(IFormFile file)
-    {
-        using var stream = new MemoryStream();
-
-        file.CopyTo(stream);
-
-        return new Entities.Media()
-        {
-            Id = Guid.NewGuid(),
-            ContentType = file.ContentType,
-            Data = stream.ToArray()
-        };
-    }
-
-      
-
-    
+        }   
        
     }
 }

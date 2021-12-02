@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using api.Entities;
+
 namespace api.Models
 {
-    public class NewPost
+    public class PostUpdated
     {
-     public Guid HeaderImageId { get; set; }
+    public Guid Id { get; set; }
+   public Guid HeaderImageId { get; set; }
 
     [MaxLength(255)]
     [Required]
@@ -17,7 +20,6 @@ namespace api.Models
     public uint Viewed { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset ModifiedAt { get; set; }
-    public ICollection<Guid> Medias { get; set; }
-    
+    public IEnumerable<Guid> Medias { get; set; }
     }
 }

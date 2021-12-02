@@ -108,7 +108,7 @@ namespace api.Migrations
                     b.HasOne("api.Entities.Post", null)
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
                 });
 
@@ -116,7 +116,8 @@ namespace api.Migrations
                 {
                     b.HasOne("api.Entities.Post", null)
                         .WithMany("Medias")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("api.Entities.Post", b =>
