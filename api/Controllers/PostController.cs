@@ -7,6 +7,7 @@ using api.Models;
 using api.Services;
 using System;
 using api.Data;
+using api.Entities;
 
 namespace api.Controller
 {
@@ -39,8 +40,6 @@ namespace api.Controller
         }
 
         [HttpPost] 
-        [ActionName(nameof(PostAsync))]
-
         public async Task<IActionResult> PostAsync(NewPost post)
         {
             var media = post.Medias.Select(id => _mc.GetAsync(id).Result);
@@ -49,8 +48,8 @@ namespace api.Controller
 
            if(result.IsSuccess)
             {
-              _log.LogInformation($"Post create in DB: {post.ToPostEntity(media).Id}");
-            return CreatedAtAction(nameof(PostAsync), new {id = post.ToPostEntity(media).Id }, post.ToPostEntity(media));
+            _log.LogInformation($"Post create in DB: {post.ToPostEntity(media).Id}");
+            return Ok(result.Post);
             }
 
             return BadRequest(result.Exception.Message);
@@ -120,7 +119,7 @@ namespace api.Controller
            
             if(result.IsSuccess)
             {
-                return Ok(result);
+                return Ok(result.Post);
             }
 
             return BadRequest(result.Exception.Message);
@@ -131,25 +130,17 @@ namespace api.Controller
         [Route("{Id}")]
         public async Task<IActionResult> Delete([FromRoute]Guid Id)
         {
+            var post = await _pc.GetAsync(Id);
 
-            var post =  await _pc.DeleteAsync(Id);
+            var posts =  await _pc.DeleteAsync(post,Id);
               
-            if (post.IsSuccess)
+            if (posts.IsSuccess)
             {
                 return Ok(post);
             }
 
-            return BadRequest(post.Exception.Message);
+            return BadRequest(posts.Exception.Message);
             
-        }
-
-
-        private bool _updatedValid(PostUpdated updated)
-        {
-            return !(updated.Title == null &&
-                    updated.Description == null &&
-                    updated.Content == null);
-                   
         }
 
     }

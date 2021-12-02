@@ -31,9 +31,6 @@ namespace api.Mappers
                 Title = post.Title,
                 Description = post.Description,
                 Content = post.Content,
-                Viewed = post.Viewed,
-                CreatedAt=DateTimeOffset.UtcNow,
-                ModifiedAt=post.CreatedAt,
                 Medias = media.ToList()
 
             };
@@ -47,6 +44,16 @@ namespace api.Mappers
                 State = comment.State.ToEntityEComment(),
                 PostId= comment.PostId
             };
+
+             public static Entities.Comment ToUpdateEntity(this Models.UpdateComment comment)
+            => new Entities.Comment()
+            {
+                Id = comment.Id,
+                Author = comment.Author,
+                Content = comment.Content,
+                PostId= comment.PostId
+            };
+
 
 
         public static Entities.ECommentState ToEntityEComment(this Models.ECommentState? State)

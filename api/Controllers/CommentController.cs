@@ -22,7 +22,6 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        [ActionName(nameof(CommentAsync))]
         public async Task<IActionResult> CommentAsync(NewComment comment)
         {
             var result = await _ser.CreateAsync(comment.ToCommentEntity());
@@ -30,28 +29,28 @@ namespace api.Controllers
             if(result.IsSuccess)
             {
                  _com.LogInformation($"Comment create in DB: {comment.ToCommentEntity().Id}");
-                return CreatedAtAction(nameof(CommentAsync), new {id = comment.ToCommentEntity().Id }, comment.ToCommentEntity());
+                return Ok(result.Comment);
             }
 
             return BadRequest(result.Exception.Message);
         }
 
-       [HttpPut]
-       [Route("{id}")]
-       public async Task<ActionResult> UpdateAsync([FromRoute]Guid id, [FromBody]NewComment comment) 
-       {
-
-            var tocommentEntity = comment.ToCommentEntity();
-            var result = await _ser.UpdateCommentAsync(tocommentEntity);
+        [HttpPut]
+        [Route("{Id}")]
+        public async Task<IActionResult> CommentUpdate([FromRoute] Guid Id, UpdateComment updated)
+        {
             
-             if (result.IsSuccess)
+            var toEntity = updated.ToUpdateEntity();
+            var result = await _ser.UpdateCommentAsync(toEntity);
+           
+            if(result.IsSuccess)
             {
-                _com.LogInformation($"Post update in DB: {comment}");
-                return Ok(result);
+                return Ok(result.Comment);
             }
 
             return BadRequest(result.Exception.Message);
-       }
+        }
+
 
 
         [HttpDelete]

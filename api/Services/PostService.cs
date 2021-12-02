@@ -38,22 +38,47 @@ namespace api.Services
 
         }
 
-        public async Task<(bool IsSuccess, Exception Exception)> DeleteAsync(Guid Id)
+        public async Task<(bool IsSuccess, Exception Exception)> DeleteAsync(Post post, Guid Id)
         {
-              if(!await ExistsAsync(Id))
+            try
             {
-                _log.LogInformation($"delete post to DB failed: {Id}");
 
-                return(false, new ArgumentException($"There is no Post with given Id: {Id}"));
-            }
-            // var post = _ctx.Posts.Where(p => p.Id == Id).Include(m => m.Medias).First();
-            //     var medias = _ctx.Posts.FirstOrDefault(p => p.Id == Id).Medias.ToList();
-            //     var comments = _ctx.Posts.FirstOrDefault(p => p.Id == Id).Comments.ToList();
+            try
+            {
+
+                var medias = post.Medias.ToList();
+                    
+                    foreach(var media in medias)
+                    {
+                        _ctx.Medias.Remove(media);
+                        await _ctx.SaveChangesAsync();
+                    }
+
+                 var comments = post.Comments.ToList();
+                    
+                    foreach(var comment in comments)
+                    {
+                        _ctx.Comments.Remove(comment);
+                        await _ctx.SaveChangesAsync();
+                    }
+        
             _ctx.Posts.Remove(await GetAsync(Id));
             await _ctx.SaveChangesAsync();
             _log.LogInformation($"Post remove in DB: {Id}");
            
+            }
+            catch
+            {
+            _ctx.Posts.Remove(await GetAsync(Id));
+            await _ctx.SaveChangesAsync();
+            }
             return (true, null);
+            }
+
+              catch(Exception e)
+            {
+                return (false, e);
+            }
         }
 
         public Task<bool> ExistsAsync(Guid id)
